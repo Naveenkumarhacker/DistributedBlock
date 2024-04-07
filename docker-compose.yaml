@@ -1,0 +1,115 @@
+version: '3'
+
+services:
+  blockservice:
+    image: blockservice
+    container_name: blockservice
+    environment:
+      PORT: "50051"
+      DB_USERNAME: user
+      DB_PASSWORD: password
+      DB_NAME: blocksß
+      DB_HOST: mariadb
+      DB_PORT: 3306
+    ports:
+      - "50051:50051"
+    depends_on:
+      - mariadb
+    networks:
+      - backend
+
+  mariadb:
+    image: mariadb
+    container_name: mariadb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: blocks
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+    networks:
+      - backend
+
+  peer1:
+    image: peer
+    container_name: peer1
+    ports:
+      - "8001:8080"
+      - "7041:9042"
+    volumes:
+      - /Users/naveenkumar/GolandProjects/DistributedBlock/private.pem:/app/private.pem # Replace Private key Path
+      - /Users/naveenkumar/GolandProjects/DistributedBlock/public.pem:/app/public.pem  # Replace Public key path
+    environment:
+      PORT: "8080"
+      BLOCK_GRPC_SERVICE_URL: blockservice:50051
+      NODE_BIND_PORT: "9042" # Node PORT -
+    depends_on:
+      - blockservice
+    networks:
+      - backend
+
+  peer2:
+    image: peer
+    container_name: peer2
+    ports:
+      - "8002:8080"
+      - "7042:9042"
+    volumes:
+      - /Users/naveenkumar/GolandProjects/DistributedBlock/private.pem:/app/private.pem # Replace Private key Path
+      - /Users/naveenkumar/GolandProjects/DistributedBlock/public.pem:/app/public.pem  # Replace Public key path
+    environment:
+      PORT: "8080"
+      BLOCK_GRPC_SERVICE_URL: blockservice:50051
+      NODE_BIND_PORT: "9042" # Node PORT -
+      ENABLE_NODE_JOIN_REQUEST: "true" # false for first node only or true
+      NODE_JOIN_ADDRESS: peer1:9042 # FOR JOINING NODE
+    depends_on:
+      - peer1
+    networks:
+      - backend
+
+  peer3:
+    image: peer
+    container_name: peer3
+    ports:
+      - "8003:8080"
+      - "7043:9042"
+    volumes:
+      - /Users/naveenkumar/GolandProjects/DistributedBlock/private.pem:/app/private.pem # Replace Private key Path
+      - /Users/naveenkumar/GolandProjects/DistributedBlock/public.pem:/app/public.pem  # Replace Public key path
+    environment:
+      PORT: "8080"
+      BLOCK_GRPC_SERVICE_URL: blockservice:50051
+      NODE_BIND_PORT: "9042" # Node PORT -
+      ENABLE_NODE_JOIN_REQUEST: "true" # false for first node only or true
+      NODE_JOIN_ADDRESS: peer1:9042 # FOR JOINING NODE
+    depends_on:
+      - peer1
+    networks:
+      - backend
+
+  peer4:
+    image: peer
+    container_name: peer4
+    ports:
+      - "8004:8080"
+      - "7044:9042"
+    volumes:
+      - /Users/naveenkumar/GolandProjects/DistributedBlock/private.pem:/app/private.pem # Replace Private key Path
+      - /Users/naveenkumar/GolandProjects/DistributedBlock/public.pem:/app/public.pem  # Replace Public key path
+    environment:
+      PORT: "8080"
+      BLOCK_GRPC_SERVICE_URL: blockservice:50051
+      NODE_BIND_PORT: "9042" # Node PORT -
+      ENABLE_NODE_JOIN_REQUEST: "true" # false for first node only or true
+      NODE_JOIN_ADDRESS: peer1:9042 # FOR JOINING NODE
+    depends_on:
+      - peer1
+    networks:
+      - backend
+
+networks:
+  backend:
+    driver: bridge

@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package blockservice;
+
+option go_package = "./../pb";
+
+service BlockService {
+  rpc CreateBlock (CreateBlockRequest) returns (CreateBlockResponse) {}
+  rpc UpdateBlock (UpdateBlockRequest) returns (UpdateBlockResponse) {}
+  rpc GetAllBlocks (GetAllBlocksRequest) returns (GetAllBlocksResponse) {}
+}
+
+message CreateBlockRequest {
+  string data = 1;
+}
+
+message CreateBlockResponse {
+  Block block = 1;
+}
+
+message UpdateBlockRequest {
+  int32 height = 1;
+  string data = 2;
+}
+
+message UpdateBlockResponse {
+  Block block = 1;
+}
+
+message GetAllBlocksRequest {
+  int32 height = 1;
+}
+
+message GetAllBlocksResponse {
+  repeated Block blocks = 1;
+}
+
+message Block {
+  int32 height = 1;
+  string hash = 2;
+  string parent = 3;
+  bytes encoded = 4;
+}

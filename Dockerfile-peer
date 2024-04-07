@@ -1,0 +1,40 @@
+# Build stage
+FROM golang:1.21.0-alpine3.17 AS build
+
+# Set environment variable to enable CGO
+ENV CGO_ENABLED=1
+
+# Install system packages required for building
+RUN apk --no-cache add \
+    gcc \
+    make \
+    libc-dev \
+    sqlite-dev \
+    && rm -rf /var/cache/apk/*
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Copy the Go application source code into the container
+COPY . .
+
+# Change directory to the peer command directory
+WORKDIR /app/cmd/peer/
+
+# Build the Go application
+RUN go build -o main .
+
+# Final stage
+FROM alpine:latest
+
+# Install any necessary runtime dependencies
+RUN apk --no-cache add tcpdump
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Copy the compiled binary from the build stage to the final container
+COPY --from=build /app/cmd/peer/main .
+
+# Command to run the executable
+CMD ["./main"]
